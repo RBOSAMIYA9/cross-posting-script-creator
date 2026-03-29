@@ -4,6 +4,7 @@ import { generateScripts } from '@/lib/openrouter';
 
 export async function POST(req) {
   try {
+    console.log("Processing transcription request with updated openrouter configuration...");
     const { url } = await req.json();
 
     if (!url) {

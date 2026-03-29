@@ -12,8 +12,8 @@ export async function generateScripts(transcriptText) {
     apiKey: process.env.OPENROUTER_API_KEY,
   });
   
-  // Use google/gemini-2.5-flash by default, or anything defined in .env
-  const model = process.env.OPENROUTER_MODEL || 'google/gemini-2.5-flash';
+  // Use a free model by default, or anything defined in .env
+  const model = process.env.OPENROUTER_MODEL || 'openrouter/free';
 
   const linkedinPrompt = fs.readFileSync(path.join(process.cwd(), 'metaprompts', 'linkedin.txt'), 'utf8');
   const reelsPrompt = fs.readFileSync(path.join(process.cwd(), 'metaprompts', 'reels.txt'), 'utf8');
@@ -31,20 +31,42 @@ export async function generateScripts(transcriptText) {
     return completion.choices[0].message.content;
   };
 
-  const [linkedinRaw, reelsRaw] = await Promise.all([
-    callLLM(linkedinPrompt, transcriptText),
-    callLLM(reelsPrompt, transcriptText)
-  ]);
+  // Execute sequentially to avoid concurrent rate limits on free OpenRouter endpoints
+  const linkedinRaw = await callLLM(linkedinPrompt, transcriptText);
+  const reelsRaw = await callLLM(reelsPrompt, transcriptText);
   
   // Clean up any markdown JSON codeblocks if the model returned them
+  // Clean up any markdown JSON codeblocks if the model returned them
   const cleanJSON = (text) => {
-    let clean = text.trim();
-    if (clean.startsWith('```json')) {
-      clean = clean.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-    } else if (clean.startsWith('```')) {
-      clean = clean.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
+    try {
+      // First try to extract content between markdown codeblocks
+      const mdMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      if (mdMatch && mdMatch[1]) {
+        return JSON.parse(mdMatch[1].trim());
+      }
+
+      // Fallback: extract substring from the first { or [ to the last } or ]
+      const firstBrace = text.indexOf('{');
+      const firstBracket = text.indexOf('[');
+      const startIndex = Math.min(
+        firstBrace === -1 ? Infinity : firstBrace,
+        firstBracket === -1 ? Infinity : firstBracket
+      );
+      
+      const lastBrace = text.lastIndexOf('}');
+      const lastBracket = text.lastIndexOf(']');
+      const endIndex = Math.max(lastBrace, lastBracket);
+
+      if (startIndex !== Infinity && endIndex !== -1 && endIndex > startIndex) {
+        return JSON.parse(text.substring(startIndex, endIndex + 1));
+      }
+
+      // absolute fallback, just try parsing the whole thing
+      return JSON.parse(text.trim());
+    } catch (err) {
+      console.error("Failed to parse AI output:", text);
+      throw new Error("Failed to parse generated scripts. The AI returned an invalid format.");
     }
-    return JSON.parse(clean);
   };
 
   return {
