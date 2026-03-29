@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getYoutubeTranscript } from '@/lib/youtube';
-import { generateScripts } from '@/lib/gemini';
+import { generateScripts } from '@/lib/openrouter';
 
 export async function POST(req) {
   try {
