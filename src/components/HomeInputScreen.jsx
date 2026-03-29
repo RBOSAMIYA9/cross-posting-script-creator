@@ -1,60 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { MdAccountCircle, MdSettings, MdError, MdLink } from "react-icons/md";
-import LoadingScreen from "./LoadingScreen";
 
-export default function HomeInputScreen() {
+export default function HomeInputScreen({
+  onGenerateScripts,
+  isSubmitting = false,
+  errorMessage = "",
+}) {
   const [urlInput, setUrlInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [localError, setLocalError] = useState("");
 
   const handleGenerateScripts = async () => {
     if (!urlInput.trim()) {
-      setError("Please enter a valid YouTube URL");
+      setLocalError("Please enter a valid YouTube URL");
       return;
     }
 
-    setIsLoading(true);
-    setError("");
+    setLocalError("");
 
-    try {
-      const response = await fetch("/api/transcribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: urlInput }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to generate scripts");
-      }
-
-      // Store generated scripts in sessionStorage for results page
-      if (data.data) {
-        sessionStorage.setItem("generatedScripts", JSON.stringify(data.data));
-        sessionStorage.setItem("sourceUrl", urlInput);
-      }
-
-      // Give loading screen a moment to display before navigating
-      setTimeout(() => {
-        router.push("/results-preview");
-      }, 1500);
-    } catch (err) {
-      console.error("Generation error:", err);
-      setError(err.message || "An error occurred. Please try again.");
-      setIsLoading(false);
+    if (typeof onGenerateScripts === "function") {
+      await onGenerateScripts(urlInput.trim());
     }
   };
-
-  // Show loading screen during processing
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <>
@@ -122,7 +91,7 @@ export default function HomeInputScreen() {
                 </div>
                 <button
                   onClick={handleGenerateScripts}
-                  disabled={!urlInput.trim()}
+                  disabled={isSubmitting || !urlInput.trim()}
                   className="kinetic-gradient text-white font-headline font-bold px-8 py-4 rounded-lg flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#5d3fd3]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Generate Scripts
@@ -149,11 +118,11 @@ export default function HomeInputScreen() {
                 </div>
               </div>
 
-              {error && (
+              {(localError || errorMessage) && (
                 <div className="mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
                   <MdError className="text-red-600 flex-shrink-0" />
                   <span className="text-red-700 text-sm font-body">
-                    {error}
+                    {localError || errorMessage}
                   </span>
                 </div>
               )}

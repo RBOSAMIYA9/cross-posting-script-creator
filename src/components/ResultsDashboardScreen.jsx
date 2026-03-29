@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   MdAccountCircle,
   MdSettings,
@@ -92,54 +92,131 @@ const defaultReels = [
   },
 ];
 
-export default function ResultsDashboardScreen() {
-  const [linkedInDrafts, setLinkedInDrafts] = useState(defaultLinkedInDrafts);
-  const [reels, setReels] = useState(defaultReels);
-  const [sourceUrl, setSourceUrl] = useState("");
+export default function ResultsDashboardScreen({
+  scriptsData,
+  sourceUrl: sourceUrlProp = "",
+  onRegenerate = () => {},
+}) {
+  const [copiedKey, setCopiedKey] = useState("");
+  const [copyError, setCopyError] = useState("");
+
+  const copyToClipboard = async (text, key) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      setCopyError("");
+      setCopiedKey(key);
+      setTimeout(() => {
+        setCopiedKey((prev) => (prev === key ? "" : prev));
+      }, 1600);
+    } catch (error) {
+      console.error("Copy failed:", error);
+      setCopyError("Unable to copy. Please try again.");
+    }
+  };
+
+  const formatReelForCopy = (reel) => {
+    const visuals =
+      Array.isArray(reel.visuals) && reel.visuals.length > 0
+        ? reel.visuals.map((item) => `- ${item}`).join("\n")
+        : "- No visual direction provided";
+
+    return [
+      `Hook: ${reel.hook}`,
+      "",
+      `Script: ${reel.script}`,
+      "",
+      `Call to Action: ${reel.cta || "N/A"}`,
+      "",
+      "Visual Direction:",
+      visuals,
+    ].join("\n");
+  };
+
+  const extractSection = (text, label) => {
+    const regex = new RegExp(
+      `\\*\\*${label}:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\n\\*\\*[A-Za-z ]+:\\*\\*|$)`,
+      "i",
+    );
+    const match = text.match(regex);
+    return match ? match[1].trim() : "";
+  };
+
+  const parseReelText = (rawText) => {
+    const hook = extractSection(rawText, "Hook");
+    const script = extractSection(rawText, "Script");
+    const visualsRaw = extractSection(rawText, "Visuals");
+
+    const visuals = visualsRaw
+      ? visualsRaw
+          .split(/\n+/)
+          .map((line) => line.replace(/^[-*]\s*/, "").trim())
+          .filter(Boolean)
+      : [];
+
+    return {
+      hook: hook || "Generated reel",
+      script: script || rawText,
+      cta: "",
+      visuals,
+    };
+  };
 
   // Validate and normalize reel data to ensure visuals array exists
   const normalizeReels = (rawReels) => {
-    return rawReels.map((reel) => ({
-      hook: reel.hook || "",
-      script: reel.script || "",
-      cta: reel.cta || "",
-      visuals: Array.isArray(reel.visuals) ? reel.visuals : [],
-    }));
+    return rawReels.map((reel) => {
+      if (typeof reel === "string") {
+        return parseReelText(reel);
+      }
+
+      return {
+        hook: reel?.hook || "Generated reel",
+        script: reel?.script || "",
+        cta: reel?.cta || "",
+        visuals: Array.isArray(reel?.visuals) ? reel.visuals : [],
+      };
+    });
   };
 
   // Validate and normalize draft data
   const normalizeDrafts = (rawDrafts) => {
-    return rawDrafts.map((draft) => ({
-      id: draft.id || `Draft #${Math.random()}`,
-      accent: draft.accent || "border-[#5d3fd3]",
-      body: draft.body || "",
-    }));
+    return rawDrafts.map((draft, index) => {
+      if (typeof draft === "string") {
+        return {
+          id: `Draft #${index + 1}`,
+          accent: "border-[#5d3fd3]",
+          body: draft,
+        };
+      }
+
+      return {
+        id: draft?.id || `Draft #${index + 1}`,
+        accent: draft?.accent || "border-[#5d3fd3]",
+        body: draft?.body || "",
+      };
+    });
   };
 
-  useEffect(() => {
-    // Load generated scripts from sessionStorage
-    const storedScripts = sessionStorage.getItem("generatedScripts");
-    const storedUrl = sessionStorage.getItem("sourceUrl");
+  const linkedinData = scriptsData?.linkedInDrafts || scriptsData?.linkedin;
+  const reelsData = scriptsData?.reels;
 
-    if (storedScripts) {
-      try {
-        const scripts = JSON.parse(storedScripts);
-        // Update with API-generated data structure if available
-        if (scripts.linkedInDrafts && Array.isArray(scripts.linkedInDrafts)) {
-          setLinkedInDrafts(normalizeDrafts(scripts.linkedInDrafts));
-        }
-        if (scripts.reels && Array.isArray(scripts.reels)) {
-          setReels(normalizeReels(scripts.reels));
-        }
-      } catch (error) {
-        console.error("Failed to parse generated scripts:", error);
-      }
-    }
+  const linkedInDrafts = Array.isArray(linkedinData)
+    ? normalizeDrafts(linkedinData)
+    : defaultLinkedInDrafts;
 
-    if (storedUrl) {
-      setSourceUrl(storedUrl);
-    }
-  }, []);
+  const reels = Array.isArray(reelsData)
+    ? normalizeReels(reelsData)
+    : defaultReels;
+  const sourceUrl = sourceUrlProp;
 
   return (
     <div className="bg-[#f9f6f5] text-[#2f2e2e] min-h-screen font-body">
@@ -196,11 +273,20 @@ export default function ResultsDashboardScreen() {
               <h1 className="text-2xl font-headline font-extrabold tracking-tight text-[#2f2e2e]">
                 Campaign Results
               </h1>
+              {sourceUrl ? (
+                <span className="text-xs text-[#787676] mt-1 truncate max-w-[420px]">
+                  Source: {sourceUrl}
+                </span>
+              ) : null}
+              {copyError ? (
+                <span className="text-xs text-red-600 mt-1">{copyError}</span>
+              ) : null}
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
               <button
                 className="flex items-center gap-2 px-5 py-2.5 bg-[#dfdcdc] text-[#2f2e2e] font-bold rounded-lg hover:bg-[#e5e2e1] transition-colors text-sm"
                 type="button"
+                onClick={onRegenerate}
               >
                 <MdRefresh className="text-lg" />
                 Regenerate
@@ -219,9 +305,9 @@ export default function ResultsDashboardScreen() {
                 </h2>
               </div>
 
-              {linkedInDrafts.map((draft) => (
+              {linkedInDrafts.map((draft, index) => (
                 <div
-                  key={draft.id}
+                  key={`${draft.id}-${index}`}
                   className={`bg-white rounded-xl p-6 shadow-[0px_20px_40px_rgba(47,46,46,0.06)] border-l-4 ${draft.accent} group hover:translate-x-1 transition-transform`}
                 >
                   <div className="flex justify-between items-start mb-4">
@@ -232,6 +318,9 @@ export default function ResultsDashboardScreen() {
                       aria-label={`Copy ${draft.id}`}
                       className="p-2 text-[#787676] hover:text-[#5d3fd3] transition-colors"
                       type="button"
+                      onClick={() =>
+                        copyToClipboard(draft.body, `linkedin-${index}`)
+                      }
                     >
                       <MdContentCopy />
                     </button>
@@ -244,8 +333,13 @@ export default function ResultsDashboardScreen() {
                   <button
                     className="w-full py-3 bg-[#f3f0ef] text-[#2f2e2e] font-bold text-xs uppercase tracking-widest rounded-lg group-hover:bg-[#a391ff]/20 group-hover:text-[#5d3fd3] transition-colors"
                     type="button"
+                    onClick={() =>
+                      copyToClipboard(draft.body, `linkedin-${index}`)
+                    }
                   >
-                    Copy to Clipboard
+                    {copiedKey === `linkedin-${index}`
+                      ? "Copied"
+                      : "Copy to Clipboard"}
                   </button>
                 </div>
               ))}
@@ -261,9 +355,9 @@ export default function ResultsDashboardScreen() {
                 </h2>
               </div>
 
-              {reels.map((reel) => (
+              {reels.map((reel, index) => (
                 <div
-                  key={reel.hook}
+                  key={`${reel.hook}-${index}`}
                   className="bg-white rounded-xl p-8 shadow-[0px_20px_40px_rgba(47,46,46,0.06)] space-y-6 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 right-0 p-4">
@@ -271,8 +365,18 @@ export default function ResultsDashboardScreen() {
                       aria-label={`Copy reel for ${reel.hook}`}
                       className="bg-[#f3f0ef] p-2 rounded-lg hover:bg-[#a391ff]/20 hover:text-[#5d3fd3] transition-all"
                       type="button"
+                      onClick={() =>
+                        copyToClipboard(
+                          formatReelForCopy(reel),
+                          `reel-${index}`,
+                        )
+                      }
                     >
-                      <MdContentCopy />
+                      {copiedKey === `reel-${index}` ? (
+                        <MdCheckCircle className="text-[#5d3fd3]" />
+                      ) : (
+                        <MdContentCopy />
+                      )}
                     </button>
                   </div>
 
@@ -285,7 +389,7 @@ export default function ResultsDashboardScreen() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid">
                     <div className="space-y-4">
                       <div>
                         <span className="text-[10px] text-[#787676] font-bold uppercase tracking-widest block mb-1">
@@ -303,28 +407,6 @@ export default function ResultsDashboardScreen() {
                           &quot;{reel.cta}&quot;
                         </p>
                       </div>
-                    </div>
-
-                    <div className="bg-[#f3f0ef] rounded-xl p-4">
-                      <span className="text-[10px] text-[#787676] font-bold uppercase tracking-widest block mb-2">
-                        Visual Direction
-                      </span>
-                      <ul className="text-[13px] space-y-3 text-[#403f3f]">
-                        {reel.visuals &&
-                        Array.isArray(reel.visuals) &&
-                        reel.visuals.length > 0 ? (
-                          reel.visuals.map((item) => (
-                            <li key={item} className="flex gap-2">
-                              <MdCheckCircle className="text-sm mt-0.5" />
-                              {item}
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-[#787676] italic">
-                            No visual direction provided
-                          </li>
-                        )}
-                      </ul>
                     </div>
                   </div>
                 </div>
