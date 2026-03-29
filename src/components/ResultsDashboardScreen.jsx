@@ -236,7 +236,7 @@ export default function ResultsDashboardScreen({
             >
               Dashboard
             </a>
-            <a
+            {/* <a
               className="text-[#afacac] font-headline font-extrabold tracking-tighter hover:text-[#5d3fd3] transition-colors duration-200"
               href="#"
             >
@@ -247,7 +247,7 @@ export default function ResultsDashboardScreen({
               href="#"
             >
               Library
-            </a>
+            </a> */}
           </div>
         </div>
 
@@ -286,16 +286,6 @@ export default function ResultsDashboardScreen({
                 <span className="text-xs text-red-600 mt-1">{copyError}</span>
               ) : null}
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#dfdcdc] text-[#2f2e2e] font-bold rounded-lg hover:bg-[#e5e2e1] transition-colors text-sm"
-                type="button"
-                onClick={onRegenerate}
-              >
-                <MdRefresh className="text-lg" />
-                Regenerate
-              </button>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -318,16 +308,6 @@ export default function ResultsDashboardScreen({
                     <span className="bg-[#5d3fd3]/10 text-[#5d3fd3] text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                       {draft.id}
                     </span>
-                    <button
-                      aria-label={`Copy ${draft.id}`}
-                      className="p-2 text-[#787676] hover:text-[#5d3fd3] transition-colors"
-                      type="button"
-                      onClick={() =>
-                        copyToClipboard(draft.body, `linkedin-${index}`)
-                      }
-                    >
-                      <MdContentCopy />
-                    </button>
                   </div>
 
                   <p className="text-[#2f2e2e] leading-relaxed text-sm mb-6 whitespace-pre-wrap">
@@ -413,37 +393,8 @@ export default function ResultsDashboardScreen({
                           {reel.script}
                         </p>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-[#787676] font-bold uppercase tracking-widest block mb-1">
-                          Call to Action
-                        </span>
-                        <p className="text-sm font-bold text-[#2f2e2e] italic">
-                          &quot;{reel.cta}&quot;
-                        </p>
-                      </div>
                     </div>
 
-                    <div className="bg-[#f3f0ef] rounded-xl p-4">
-                      <span className="text-[10px] text-[#787676] font-bold uppercase tracking-widest block mb-2">
-                        Visual Direction
-                      </span>
-                      <ul className="text-[13px] space-y-3 text-[#403f3f]">
-                        {reel.visuals &&
-                          Array.isArray(reel.visuals) &&
-                          reel.visuals.length > 0 ? (
-                          reel.visuals.map((item) => (
-                            <li key={item} className="flex gap-2">
-                              <MdCheckCircle className="text-sm mt-0.5" />
-                              {item}
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-[#787676] italic">
-                            No visual direction provided
-                          </li>
-                        )}
-                      </ul>
-                    </div>
                   </div>
 
                   <button

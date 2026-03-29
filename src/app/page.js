@@ -6,7 +6,6 @@ import HomeInputScreen from "../components/HomeInputScreen";
 import LoadingScreen from "../components/LoadingScreen";
 import TranscriptFallbackScreen from "../components/TranscriptFallbackScreen";
 import ResultsDashboardScreen from "../components/ResultsDashboardScreen";
-import { useState } from "react";
 
 export default function Home() {
   const [step, setStep] = useState(STEPS.HOME);

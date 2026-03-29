@@ -68,7 +68,7 @@ export default function LoadingScreen() {
             >
               Dashboard
             </a>
-            <a
+            {/* <a
               className="text-[#afacac] font-medium hover:text-[#5d3fd3] transition-colors duration-200"
               href="#"
             >
@@ -79,7 +79,7 @@ export default function LoadingScreen() {
               href="#"
             >
               Library
-            </a>
+            </a> */}
           </div>
         </div>
 

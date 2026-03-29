@@ -38,12 +38,12 @@ export default function HomeInputScreen({
           >
             Dashboard
           </a>
-          <a
+          {/* <a
             className="text-[#afacac] font-headline font-extrabold tracking-tighter hover:text-[#5d3fd3] transition-colors duration-200"
             href="#"
           >
             History
-          </a>
+          </a> */}
         </div>
         <div className="flex items-center gap-4">
           <button className="material-symbols-outlined text-[#5d3fd3] active:scale-95 transition-transform">

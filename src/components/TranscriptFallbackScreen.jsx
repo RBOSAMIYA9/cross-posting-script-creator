@@ -43,7 +43,7 @@ export default function TranscriptFallbackScreen() {
               >
                 Dashboard
               </a>
-              <a
+              {/* <a
                 className="text-[#afacac] hover:text-[#5d3fd3] transition-colors duration-200"
                 href="#"
               >
@@ -54,7 +54,7 @@ export default function TranscriptFallbackScreen() {
                 href="#"
               >
                 Library
-              </a>
+              </a> */}
             </div>
           </div>
 
