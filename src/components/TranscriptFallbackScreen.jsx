@@ -10,7 +10,10 @@ import {
   MdInfo,
 } from "react-icons/md";
 
-export default function TranscriptFallbackScreen() {
+export default function TranscriptFallbackScreen({
+  onGenerateText = null,
+  isSubmitting = false,
+}) {
   const [transcript, setTranscript] = useState("");
 
   const wordCount = useMemo(() => {
@@ -25,6 +28,13 @@ export default function TranscriptFallbackScreen() {
       setTranscript((prev) => (prev ? `${prev}\n${text}` : text));
     } catch {
       // Ignore clipboard errors in unsupported browsers/permissions.
+    }
+  };
+
+  const handleGenerateFromText = async () => {
+    if (!transcript.trim()) return;
+    if (typeof onGenerateText === "function") {
+      await onGenerateText(transcript.trim());
     }
   };
 
@@ -154,7 +164,9 @@ export default function TranscriptFallbackScreen() {
                     <span>Markdown and plain text supported</span>
                   </div>
                   <button
-                    className="kinetic-gradient text-[#f6f0ff] px-8 py-4 rounded-lg font-headline font-extrabold tracking-tight text-lg shadow-xl shadow-[#5d3fd3]/20 hover:scale-[1.02] active:scale-95 transition-all w-full md:w-auto"
+                    className="kinetic-gradient text-[#f6f0ff] px-8 py-4 rounded-lg font-headline font-extrabold tracking-tight text-lg shadow-xl shadow-[#5d3fd3]/20 hover:scale-[1.02] active:scale-95 transition-all w-full md:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleGenerateFromText}
+                    disabled={isSubmitting || !transcript.trim()}
                     type="button"
                   >
                     Generate from Text
