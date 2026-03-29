@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
 import { MyVideo } from "../remotion/MyVideo";
 import {
@@ -99,6 +99,7 @@ export default function ResultsDashboardScreen() {
   const [linkedInDrafts, setLinkedInDrafts] = useState(defaultLinkedInDrafts);
   const [reels, setReels] = useState(defaultReels);
   const [sourceUrl, setSourceUrl] = useState("");
+  const [videoPreview, setVideoPreview] = useState(null);
 
   // Validate and normalize reel data to ensure visuals array exists
   const normalizeReels = (rawReels) => {
