@@ -19,16 +19,32 @@ export async function generateScripts(transcriptText) {
   const reelsPrompt = fs.readFileSync(path.join(process.cwd(), 'metaprompts', 'reels.txt'), 'utf8');
 
   const callLLM = async (systemPrompt, userTranscript) => {
-    const completion = await openai.chat.completions.create({
-      model: model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: `Here is the transcript to process:\n\n${userTranscript}` }
-      ],
-      max_tokens: 2000,
-    });
+    try {
+      const completion = await openai.chat.completions.create({
+        model: model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Here is the transcript to process:\n\n${userTranscript}` }
+        ],
+        max_tokens: 2000,
+      });
 
-    return completion.choices[0].message.content;
+      if (!completion.choices || completion.choices.length === 0) {
+        console.error("API returned no choices. Full response:", JSON.stringify(completion));
+        return null;
+      }
+
+      const content = completion.choices[0].message?.content;
+      if (!content) {
+        console.error("API returned empty content. Full response:", JSON.stringify(completion));
+        return null;
+      }
+
+      return content;
+    } catch (err) {
+      console.error("Error calling LLM:", err);
+      return null;
+    }
   };
 
   // Execute sequentially to avoid concurrent rate limits on free OpenRouter endpoints
@@ -36,8 +52,11 @@ export async function generateScripts(transcriptText) {
   const reelsRaw = await callLLM(reelsPrompt, transcriptText);
   
   // Clean up any markdown JSON codeblocks if the model returned them
-  // Clean up any markdown JSON codeblocks if the model returned them
   const cleanJSON = (text) => {
+    if (!text || typeof text !== 'string') {
+      console.error("Failed to parse AI output: text is empty or not a string (value:", text, ")");
+      throw new Error("Failed to generate scripts. The AI returned an empty or invalid response.");
+    }
     try {
       // First try to extract content between markdown codeblocks
       const mdMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -64,7 +83,7 @@ export async function generateScripts(transcriptText) {
       // absolute fallback, just try parsing the whole thing
       return JSON.parse(text.trim());
     } catch (err) {
-      console.error("Failed to parse AI output:", text);
+      console.error("Failed to parse AI output. Content was:", text);
       throw new Error("Failed to parse generated scripts. The AI returned an invalid format.");
     }
   };
