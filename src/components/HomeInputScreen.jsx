@@ -52,9 +52,7 @@ export default function HomeInputScreen() {
             </h1>
 
             <p className="text-[#5c5b5b] text-lg md:text-xl font-body max-w-2xl mb-12">
-              Our AI extracts the core insights from any video and reformats
-              them for your audience&apos;s favorite platforms. Fast, focused,
-              and frictionless.
+              {"Our AI extracts the core insights from any video and reformats them for your audience's favorite platforms. Fast, focused, and frictionless."}
             </p>
 
             <div className="w-full max-w-2xl">
@@ -160,9 +158,7 @@ export default function HomeInputScreen() {
                   Smart Narrative Extraction
                 </h3>
                 <p className="text-[#5c5b5b] font-body max-w-md">
-                  Our neural engine doesn&apos;t just transcribe&mdash;it
-                  understands the hook, the tension, and the climax of your
-                  video to craft perfect posts.
+                  {"Our neural engine doesn't just transcribe—it understands the hook, the tension, and the climax of your video to craft perfect posts."}
                 </p>
               </div>
             </div>
@@ -175,8 +171,7 @@ export default function HomeInputScreen() {
                 High-Velocity Output
               </h3>
               <p className="text-[#5c5b5b] font-body text-sm">
-                Download your LinkedIn threads, Reels scripts, and X posts
-                instantly after processing.
+                {"Download your LinkedIn threads, Reels scripts, and X posts instantly after processing."}
               </p>
             </div>
 
@@ -188,8 +183,7 @@ export default function HomeInputScreen() {
                 Multi-Platform Sync
               </h3>
               <p className="text-[#5c5b5b] font-body text-sm">
-                Direct integrations with your favorite scheduling tools to keep
-                your pipeline moving at light speed.
+                {"Direct integrations with your favorite scheduling tools to keep your pipeline moving at light speed."}
               </p>
             </div>
           </div>

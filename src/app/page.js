@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { STEPS } from "@/constants";
 import HomeInputScreen from "../components/HomeInputScreen";
 import FallbackPreviewPage from "./fallback-preview/page";
