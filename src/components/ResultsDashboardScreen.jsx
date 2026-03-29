@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Player } from "@remotion/player";
+import { MyVideo } from "../remotion/MyVideo";
 import {
   MdAccountCircle,
   MdSettings,
@@ -9,6 +11,7 @@ import {
   MdMovie,
   MdContentCopy,
   MdCheckCircle,
+  MdClose,
 } from "react-icons/md";
 
 const defaultLinkedInDrafts = [
@@ -170,6 +173,7 @@ export default function ResultsDashboardScreen({
       visuals,
     };
   };
+  const [videoPreview, setVideoPreview] = useState(null);
 
   // Validate and normalize reel data to ensure visuals array exists
   const normalizeReels = (rawReels) => {
@@ -330,17 +334,27 @@ export default function ResultsDashboardScreen({
                     {draft.body}
                   </p>
 
-                  <button
-                    className="w-full py-3 bg-[#f3f0ef] text-[#2f2e2e] font-bold text-xs uppercase tracking-widest rounded-lg group-hover:bg-[#a391ff]/20 group-hover:text-[#5d3fd3] transition-colors"
-                    type="button"
+                  <div className="space-y-2">
+                    <button
+                      className="w-full py-3 bg-[#f3f0ef] text-[#2f2e2e] font-bold text-xs uppercase tracking-widest rounded-lg group-hover:bg-[#a391ff]/20 group-hover:text-[#5d3fd3] transition-colors"
+                      type="button"
                     onClick={() =>
                       copyToClipboard(draft.body, `linkedin-${index}`)
                     }
-                  >
-                    {copiedKey === `linkedin-${index}`
+                    >
+                      {copiedKey === `linkedin-${index}`
                       ? "Copied"
                       : "Copy to Clipboard"}
-                  </button>
+                    </button>
+                    <button
+                      className="w-full py-3 kinetic-gradient text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#5d3fd3]/20"
+                      type="button"
+                      onClick={() => setVideoPreview(draft.body)}
+                    >
+                      <MdMovie className="text-base" />
+                      Generate Video with Remotion
+                    </button>
+                  </div>
                 </div>
               ))}
             </section>
@@ -408,7 +422,38 @@ export default function ResultsDashboardScreen({
                         </p>
                       </div>
                     </div>
+
+                    <div className="bg-[#f3f0ef] rounded-xl p-4">
+                      <span className="text-[10px] text-[#787676] font-bold uppercase tracking-widest block mb-2">
+                        Visual Direction
+                      </span>
+                      <ul className="text-[13px] space-y-3 text-[#403f3f]">
+                        {reel.visuals &&
+                          Array.isArray(reel.visuals) &&
+                          reel.visuals.length > 0 ? (
+                          reel.visuals.map((item) => (
+                            <li key={item} className="flex gap-2">
+                              <MdCheckCircle className="text-sm mt-0.5" />
+                              {item}
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-[#787676] italic">
+                            No visual direction provided
+                          </li>
+                        )}
+                      </ul>
+                    </div>
                   </div>
+
+                  <button
+                    className="w-full mt-6 py-3 bg-gradient-to-r from-[#9b3666] to-[#ff8cbc] text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#9b3666]/20"
+                    type="button"
+                    onClick={() => setVideoPreview(reel.hook + "\\n\\n" + reel.script)}
+                  >
+                    <MdMovie className="text-base" />
+                    Generate Video with Remotion
+                  </button>
                 </div>
               ))}
             </section>
@@ -455,6 +500,42 @@ export default function ResultsDashboardScreen({
           </div>
         </div>
       </footer>
+
+      {videoPreview && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#2f2e2e]/80 backdrop-blur-sm p-4">
+          <div className="bg-[#111111] rounded-2xl overflow-hidden shadow-2xl relative max-w-sm w-full border border-white/10 kinetic-shadow">
+            <div className="flex justify-between items-center p-4 border-b border-white/10">
+              <span className="text-white font-headline font-bold text-xs tracking-widest uppercase">
+                Preview Render
+              </span>
+              <button
+                onClick={() => setVideoPreview(null)}
+                className="text-white/50 hover:text-white transition-colors p-1"
+                aria-label="Close Preview"
+              >
+                <MdClose className="text-xl" />
+              </button>
+            </div>
+            <div className="w-full aspect-[9/16] bg-black">
+              <Player
+                component={MyVideo}
+                inputProps={{ script: videoPreview }}
+                durationInFrames={150}
+                compositionWidth={1080}
+                compositionHeight={1920}
+                fps={30}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                }}
+                controls
+                autoPlay
+                loop
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { STEPS } from "@/constants";
 import HomeInputScreen from "../components/HomeInputScreen";
 import LoadingScreen from "../components/LoadingScreen";
