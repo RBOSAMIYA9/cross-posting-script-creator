@@ -1,26 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-body: Inter, sans-serif;
+  --font-headline: Manrope, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background-color: #f9f6f5;
+  color: #2f2e2e;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-headline);
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.kinetic-gradient {
+  background: linear-gradient(135deg, #5d3fd3 0%, #a391ff 100%);
+}
+
+.kinetic-shadow {
+  box-shadow: 0 20px 40px rgba(47, 46, 46, 0.06);
+}
+
+@keyframes kinetic-pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.72);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.28);
+    opacity: 0.18;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.72);
+    opacity: 0.65;
+  }
+}
+
+.kinetic-loader-ring {
+  transform: translate(-50%, -50%) scale(0.72);
+  animation: kinetic-pulse-ring 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+@keyframes kinetic-core-float {
+  0% {
+    transform: rotate(12deg) translateY(0);
+  }
+  50% {
+    transform: rotate(12deg) translateY(-4px);
+  }
+  100% {
+    transform: rotate(12deg) translateY(0);
+  }
+}
+
+.kinetic-loader-core {
+  animation: kinetic-core-float 2.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes kinetic-status-swap {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.status-fade-item {
+  animation: kinetic-status-swap 2.95s ease-in-out both;
+  will-change: transform, opacity;
 }
