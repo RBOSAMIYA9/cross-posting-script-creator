@@ -1,3 +1,5 @@
+"use client";
+
 import { STEPS } from "@/constants";
 import HomeInputScreen from "../components/HomeInputScreen";
 import FallbackPreviewPage from "./fallback-preview/page";
