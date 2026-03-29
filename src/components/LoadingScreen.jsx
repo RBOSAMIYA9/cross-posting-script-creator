@@ -27,6 +27,7 @@ const statusItems = [
 
 export default function LoadingScreen() {
   const [statusIndex, setStatusIndex] = useState(0);
+  const [progress, setProgress] = useState(12);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -34,6 +35,21 @@ export default function LoadingScreen() {
     }, 3000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const progressTimer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 95) {
+          return 95;
+        }
+
+        const next = prev + Math.floor(Math.random() * 7) + 2;
+        return next > 95 ? 95 : next;
+      });
+    }, 650);
+
+    return () => clearInterval(progressTimer);
   }, []);
 
   const ActiveStatusIcon = statusItems[statusIndex].icon;
@@ -114,10 +130,13 @@ export default function LoadingScreen() {
           <div className="bg-white/70 backdrop-blur-xl rounded-xl p-8 shadow-[0px_20px_40px_rgba(47,46,46,0.06)] relative overflow-hidden">
             <div className="flex items-center gap-4 mb-6">
               <div className="flex-grow bg-[#f3f0ef] h-1.5 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-[#5d3fd3] to-[#a391ff] h-full w-2/3 rounded-full" />
+                <div
+                  className="bg-gradient-to-r from-[#5d3fd3] to-[#a391ff] h-full rounded-full transition-[width] duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
               <span className="text-xs font-bold font-label text-[#5d3fd3]">
-                67%
+                {progress}%
               </span>
             </div>
 

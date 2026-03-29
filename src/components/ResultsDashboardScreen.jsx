@@ -14,7 +14,7 @@ import {
   MdClose,
 } from "react-icons/md";
 
-const linkedInDrafts = [
+const defaultLinkedInDrafts = [
   {
     id: "Draft #1",
     accent: "border-[#5d3fd3]",
@@ -59,7 +59,7 @@ Experience the difference today. Link in bio.`,
   },
 ];
 
-const reels = [
+const defaultReels = [
   {
     hook: "Stop wasting hours on content that no one reads.",
     script:
@@ -96,7 +96,53 @@ const reels = [
 ];
 
 export default function ResultsDashboardScreen() {
-  const [videoPreview, setVideoPreview] = useState(null);
+  const [linkedInDrafts, setLinkedInDrafts] = useState(defaultLinkedInDrafts);
+  const [reels, setReels] = useState(defaultReels);
+  const [sourceUrl, setSourceUrl] = useState("");
+
+  // Validate and normalize reel data to ensure visuals array exists
+  const normalizeReels = (rawReels) => {
+    return rawReels.map((reel) => ({
+      hook: reel.hook || "",
+      script: reel.script || "",
+      cta: reel.cta || "",
+      visuals: Array.isArray(reel.visuals) ? reel.visuals : [],
+    }));
+  };
+
+  // Validate and normalize draft data
+  const normalizeDrafts = (rawDrafts) => {
+    return rawDrafts.map((draft) => ({
+      id: draft.id || `Draft #${Math.random()}`,
+      accent: draft.accent || "border-[#5d3fd3]",
+      body: draft.body || "",
+    }));
+  };
+
+  useEffect(() => {
+    // Load generated scripts from sessionStorage
+    const storedScripts = sessionStorage.getItem("generatedScripts");
+    const storedUrl = sessionStorage.getItem("sourceUrl");
+
+    if (storedScripts) {
+      try {
+        const scripts = JSON.parse(storedScripts);
+        // Update with API-generated data structure if available
+        if (scripts.linkedInDrafts && Array.isArray(scripts.linkedInDrafts)) {
+          setLinkedInDrafts(normalizeDrafts(scripts.linkedInDrafts));
+        }
+        if (scripts.reels && Array.isArray(scripts.reels)) {
+          setReels(normalizeReels(scripts.reels));
+        }
+      } catch (error) {
+        console.error("Failed to parse generated scripts:", error);
+      }
+    }
+
+    if (storedUrl) {
+      setSourceUrl(storedUrl);
+    }
+  }, []);
 
   return (
     <div className="bg-[#f9f6f5] text-[#2f2e2e] min-h-screen font-body">
@@ -277,12 +323,20 @@ export default function ResultsDashboardScreen() {
                         Visual Direction
                       </span>
                       <ul className="text-[13px] space-y-3 text-[#403f3f]">
-                        {reel.visuals.map((item) => (
-                          <li key={item} className="flex gap-2">
-                            <MdCheckCircle className="text-sm mt-0.5" />
-                            {item}
+                        {reel.visuals &&
+                          Array.isArray(reel.visuals) &&
+                          reel.visuals.length > 0 ? (
+                          reel.visuals.map((item) => (
+                            <li key={item} className="flex gap-2">
+                              <MdCheckCircle className="text-sm mt-0.5" />
+                              {item}
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-[#787676] italic">
+                            No visual direction provided
                           </li>
-                        ))}
+                        )}
                       </ul>
                     </div>
                   </div>
