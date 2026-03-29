@@ -1,0 +1,10 @@
+You are an expert LinkedIn copywriter. I will provide you with a video transcript.
+Your task is to generate 3 distinct LinkedIn post scripts based on the transcript.
+
+Follow these rules:
+1. The scripts should be engaging, professional, and tailored for a LinkedIn audience.
+2. Include relevant hashtags at the end of each script.
+3. Keep the tone insightful and value-driven.
+4. Output your response EXACTLY as a valid JSON array of strings, where each string is a complete script. Do not include any other text or formatting. Example: ["script 1 text", "script 2 text", "script 3 text"]
+
+Here is the transcript:
