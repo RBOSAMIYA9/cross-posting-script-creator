@@ -14,17 +14,20 @@ export default function Home() {
   const [scriptsData, setScriptsData] = useState(null);
   const [sourceUrl, setSourceUrl] = useState("");
 
-  const handleGenerateScripts = async (url) => {
+  const handleGenerateScripts = async (urlOrText, inputType = "url") => {
     setErrorMessage("");
     setIsSubmitting(true);
-    setSourceUrl(url);
+    setSourceUrl(urlOrText);
     setStep(STEPS.LOADING);
 
     try {
+      const payload =
+        inputType === "text" ? { text: urlOrText } : { url: urlOrText };
+
       const response = await fetch("/api/transcribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -63,7 +66,12 @@ export default function Home() {
         />
       )}
       {step === STEPS.LOADING && <LoadingScreen />}
-      {step === STEPS.FALLBACK && <TranscriptFallbackScreen />}
+      {step === STEPS.FALLBACK && (
+        <TranscriptFallbackScreen
+          onGenerateText={(text) => handleGenerateScripts(text, "text")}
+          isSubmitting={isSubmitting}
+        />
+      )}
       {step === STEPS.RESULTS && (
         <ResultsDashboardScreen
           scriptsData={scriptsData}

@@ -2,26 +2,40 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { MdAccountCircle, MdSettings, MdError, MdLink } from "react-icons/md";
+import {
+  MdAccountCircle,
+  MdSettings,
+  MdError,
+  MdLink,
+  MdArticle,
+} from "react-icons/md";
 
 export default function HomeInputScreen({
   onGenerateScripts,
   isSubmitting = false,
   errorMessage = "",
 }) {
+  const [inputMode, setInputMode] = useState("url"); // "url" or "text"
   const [urlInput, setUrlInput] = useState("");
+  const [textInput, setTextInput] = useState("");
   const [localError, setLocalError] = useState("");
 
   const handleGenerateScripts = async () => {
-    if (!urlInput.trim()) {
-      setLocalError("Please enter a valid YouTube URL");
+    const input = inputMode === "url" ? urlInput : textInput;
+
+    if (!input.trim()) {
+      const message =
+        inputMode === "url"
+          ? "Please enter a valid YouTube URL"
+          : "Please paste or type your transcript content";
+      setLocalError(message);
       return;
     }
 
     setLocalError("");
 
     if (typeof onGenerateScripts === "function") {
-      await onGenerateScripts(urlInput.trim());
+      await onGenerateScripts(input.trim(), inputMode);
     }
   };
 
@@ -70,37 +84,102 @@ export default function HomeInputScreen({
             </h1>
 
             <p className="text-[#5c5b5b] text-lg md:text-xl font-body max-w-2xl mb-12">
-              {"Our AI extracts the core insights from any video and reformats them for your audience's favorite platforms. Fast, focused, and frictionless."}
+              {
+                "Our AI extracts the core insights from any video and reformats them for your audience's favorite platforms. Fast, focused, and frictionless."
+              }
             </p>
 
             <div className="w-full max-w-2xl">
-              <div className="bg-[#f3f0ef] p-2 rounded-xl flex flex-col md:flex-row gap-2 kinetic-shadow transition-all duration-300 focus-within:bg-white focus-within:ring-2 ring-[#5d3fd3]/20">
-                <div className="flex-grow flex items-center px-4 py-3 bg-white rounded-lg border border-transparent focus-within:border-[#5d3fd3]/30 transition-all">
-                  <span className="material-symbols-outlined text-[#787676] mr-3">
-                    <MdLink className="h-5 w-5" />
-                  </span>
-                  <input
-                    type="text"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="Paste YouTube URL here..."
-                    className="bg-transparent border-none focus:ring-0 w-full font-body text-[#2f2e2e] placeholder:text-[#afacac]"
-                  />
-                </div>
+              {/* Input Mode Tabs */}
+              <div className="flex gap-3 mb-4">
                 <button
-                  onClick={handleGenerateScripts}
-                  disabled={isSubmitting || !urlInput.trim()}
-                  className="kinetic-gradient text-white font-headline font-bold px-8 py-4 rounded-lg flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#5d3fd3]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    setInputMode("url");
+                    setLocalError("");
+                  }}
+                  className={`px-6 py-3 rounded-lg font-headline font-bold text-sm transition-all duration-200 flex items-center gap-2 ${
+                    inputMode === "url"
+                      ? "kinetic-gradient text-white shadow-lg shadow-[#5d3fd3]/20"
+                      : "bg-[#f3f0ef] text-[#2f2e2e] hover:bg-[#e5e2e1]"
+                  }`}
                 >
-                  Generate Scripts
-                  <span
-                    className="material-symbols-outlined text-sm"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    bolt
-                  </span>
+                  <MdLink className="h-4 w-4" />
+                  YouTube URL
+                </button>
+                <button
+                  onClick={() => {
+                    setInputMode("text");
+                    setLocalError("");
+                  }}
+                  className={`px-6 py-3 rounded-lg font-headline font-bold text-sm transition-all duration-200 flex items-center gap-2 ${
+                    inputMode === "text"
+                      ? "kinetic-gradient text-white shadow-lg shadow-[#5d3fd3]/20"
+                      : "bg-[#f3f0ef] text-[#2f2e2e] hover:bg-[#e5e2e1]"
+                  }`}
+                >
+                  <MdArticle className="h-4 w-4" />
+                  Paste Transcript
                 </button>
               </div>
+
+              {/* URL Input Mode */}
+              {inputMode === "url" && (
+                <div className="bg-[#f3f0ef] p-2 rounded-xl flex flex-col md:flex-row gap-2 kinetic-shadow transition-all duration-300 focus-within:bg-white focus-within:ring-2 ring-[#5d3fd3]/20">
+                  <div className="flex-grow flex items-center px-4 py-3 bg-white rounded-lg border border-transparent focus-within:border-[#5d3fd3]/30 transition-all">
+                    <span className="material-symbols-outlined text-[#787676] mr-3">
+                      <MdLink className="h-5 w-5" />
+                    </span>
+                    <input
+                      type="text"
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      placeholder="Paste YouTube URL here..."
+                      className="bg-transparent border-none focus:ring-0 w-full font-body text-[#2f2e2e] placeholder:text-[#afacac]"
+                    />
+                  </div>
+                  <button
+                    onClick={handleGenerateScripts}
+                    disabled={isSubmitting || !urlInput.trim()}
+                    className="kinetic-gradient text-white font-headline font-bold px-8 py-4 rounded-lg flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#5d3fd3]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Generate Scripts
+                    <span
+                      className="material-symbols-outlined text-sm"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
+                      bolt
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {/* Text Input Mode */}
+              {inputMode === "text" && (
+                <div className="bg-[#f3f0ef] p-2 rounded-xl kinetic-shadow transition-all duration-300 focus-within:bg-white focus-within:ring-2 ring-[#5d3fd3]/20">
+                  <div className="flex flex-col gap-2">
+                    <textarea
+                      value={textInput}
+                      onChange={(e) => setTextInput(e.target.value)}
+                      placeholder="Paste your transcript or content here..."
+                      rows="6"
+                      className="w-full px-4 py-4 bg-white rounded-lg border border-transparent focus:border-[#5d3fd3]/30 focus:ring-2 ring-[#5d3fd3]/20 font-body text-[#2f2e2e] placeholder:text-[#afacac] focus:outline-none transition-all resize-none"
+                    />
+                    <button
+                      onClick={handleGenerateScripts}
+                      disabled={isSubmitting || !textInput.trim()}
+                      className="kinetic-gradient text-white font-headline font-bold px-8 py-4 rounded-lg flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#5d3fd3]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Generate Scripts
+                      <span
+                        className="material-symbols-outlined text-sm"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        bolt
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="mt-4 flex gap-4 items-center">
                 <span className="text-label text-xs text-[#787676] font-semibold uppercase tracking-wider">
@@ -189,7 +268,9 @@ export default function HomeInputScreen({
                   Smart Narrative Extraction
                 </h3>
                 <p className="text-[#5c5b5b] font-body max-w-md">
-                  {"Our neural engine doesn't just transcribe—it understands the hook, the tension, and the climax of your video to craft perfect posts."}
+                  {
+                    "Our neural engine doesn't just transcribe—it understands the hook, the tension, and the climax of your video to craft perfect posts."
+                  }
                 </p>
               </div>
             </div>
@@ -202,7 +283,9 @@ export default function HomeInputScreen({
                 High-Velocity Output
               </h3>
               <p className="text-[#5c5b5b] font-body text-sm">
-                {"Download your LinkedIn threads, Reels scripts, and X posts instantly after processing."}
+                {
+                  "Download your LinkedIn threads, Reels scripts, and X posts instantly after processing."
+                }
               </p>
             </div>
 
@@ -214,7 +297,9 @@ export default function HomeInputScreen({
                 Multi-Platform Sync
               </h3>
               <p className="text-[#5c5b5b] font-body text-sm">
-                {"Direct integrations with your favorite scheduling tools to keep your pipeline moving at light speed."}
+                {
+                  "Direct integrations with your favorite scheduling tools to keep your pipeline moving at light speed."
+                }
               </p>
             </div>
           </div>
